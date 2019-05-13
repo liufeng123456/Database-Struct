@@ -1,0 +1,115 @@
+Stack.h实现
+
+#pragma once
+typedef int SDataType;
+typedef struct Stack {
+	SDataType* array;
+	int capacity;
+	int size;
+}stack;
+void StackInit(stack* s);
+void StackPush(stack* s,SDataType data);
+void StackPop(stack* s);
+SDataType StackTop(stack* s);
+int StackSize(stack* s);
+void CheckCapacity(stack* s);
+int StackEmpty(stack* s);
+void StackDestroy(stack* s);
+
+
+Stack.h实现
+
+#include"Stack.h"
+#include <stdio.h>
+#include<assert.h>
+#include<stdlib.h>
+void StackInit(stack* s) {
+	assert(s);
+	s->array = (SDataType*)malloc(sizeof(SDataType) * 3);
+	if (s->array == NULL) {
+		assert(0);
+		return;
+	}
+	s->capacity = 3;
+	s->size = 0;
+}
+void StackPush(stack* s,SDataType data) {
+	assert(s);
+	CheckCapacity(s);
+	s->array[s->size] = data;
+	s->size++;
+}
+void StackPop(stack* s) {
+	assert(s);
+	if (StackEmpty(s)) {
+		return;
+	}
+	s->size -= 1;
+}
+SDataType StackTop(stack* s) {
+	assert(s);
+	return s->array[s->size - 1];
+}
+int StackSize(stack* s) {
+	assert(s);
+	return s->size;
+}
+void StackDestroy(stack* s) {
+	assert(s);
+	if (s->array) {
+		free(s->array);
+		s->capacity = 0;
+		s->size = 0;
+	}
+}
+int StackEmpty(stack* s) {
+	assert(s);
+	return s->size == 0;
+}
+void CheckCapacity(stack* s) {
+	assert(s);
+	if (s->size == s->capacity) {
+		SDataType NewCapacity = (s->capacity) * 2;
+		//开辟新空间
+		SDataType* tmp = (SDataType*)malloc(sizeof(SDataType)*NewCapacity);
+		if (tmp == NULL) {
+			assert(0);
+			return;
+		}
+		//拷贝元素
+		for (int i = 0; i < s->size; ++i) {
+			tmp[i] = s->array[i];
+		}
+		//释放旧空间
+		free(s->array);
+		//更新参数
+		s->array = tmp;
+		s->capacity = NewCapacity;
+	}
+}
+
+void test() {
+	stack s;
+	StackInit(&s);
+
+	StackPush(&s, 1);
+	StackPush(&s, 2);
+	StackPush(&s, 3);
+	printf("size = %d\n", StackSize(&s));
+	printf("top = %d\n", StackTop(&s));
+	StackPop(&s);
+	printf("size = %d\n",StackSize(&s));
+	printf("top = %d\n", StackTop(&s));
+	StackPush(&s, 4);
+	StackPush(&s, 5);
+	StackPush(&s, 6);
+	printf("size = %d\n", StackSize(&s));
+	printf("top = %d\n", StackTop(&s));
+	StackDestroy(&s);
+	printf("size = %d\n", StackSize(&s));
+}
+int main() {
+	test();
+	system("pause");
+	return 0;
+}
