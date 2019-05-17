@@ -1,0 +1,127 @@
+Queue.h实现
+typedef int DataType;
+typedef struct QNode {
+	DataType data;
+	struct QNode* next;
+}qNode;
+typedef struct Queue {
+	qNode* front;
+	qNode* rear;
+}queue;
+void QueueInit(queue* s);
+void QueuePush(queue* s, DataType data);
+void QueuePop(queue* s);
+int QueueEmpty(queue* s);
+qNode* BuyQueueNode(DataType data);
+void QueueDestroy(queue* s);
+int QueueSize(queue* s);
+DataType QueueFront(queue* s);
+DataType QueueBack(queue* s);
+void TestQueue();
+
+
+
+Queue.c实现
+#include"Queue.h"
+#include<stdio.h>
+#include<stdlib.h>
+#include<assert.h>
+void QueueInit(queue* s) {
+	assert(s);
+	s->front = NULL;
+	s->rear = NULL;
+}
+void QueuePush(queue* s, DataType data) {
+	assert(s);
+	qNode* node = (qNode*)malloc(sizeof(qNode));
+	if (node == NULL) {
+		assert(0);
+		return;
+	}
+	node->data = data;
+	node->next = NULL;
+	if (s->front == NULL) {
+		s->front = node;
+		s->rear = node;
+	} else {
+		s->rear->next = node;
+		s->rear = node;
+	}
+
+}
+void QueuePop(queue* s) {
+	assert(s);
+	qNode* pDelNode = NULL;
+	if (QueueEmpty(s)) {
+		return;
+	} 
+	pDelNode = s->front;
+	if (pDelNode->next == NULL) {
+		s->front = s->rear = NULL;
+	} else {
+		s->front = pDelNode->next;
+	}
+	free(pDelNode);
+}
+int QueueEmpty(queue* s) {
+	assert(s);
+	return s->front == NULL;
+}
+qNode* BuyQueueNode(DataType data) {
+	qNode* pNewNode = (qNode*)malloc(sizeof(qNode));
+	if (pNewNode == NULL) {
+		assert(0);
+		return NULL;
+	}
+	pNewNode->data = data;
+	pNewNode->next = NULL;
+	return pNewNode;
+}
+int QueueSize(queue* s) {
+	assert(s);
+	int count = 0;
+	qNode* pCur = s->front;
+	while (pCur) {
+		count++;
+		pCur = pCur->next;
+	}
+	return count;
+}
+DataType QueueFront(queue* s) {
+	assert(s);
+	return s->front->data;
+}
+DataType QueueBack(queue* s) {
+	assert(s);
+	return s->rear->data;
+}
+void QueueDestroy(queue* s) {
+	assert(s);
+	qNode* pCur = s->front;
+	while (pCur) {
+		s->front = pCur->next;
+		free(pCur);
+		pCur = s->front;
+	}
+	s->front = s->rear = NULL;
+}
+void TestQueue(){
+	queue s;
+	QueueInit(&s);
+	QueuePush(&s, 1);
+	QueuePush(&s, 2);
+	QueuePush(&s, 3);
+	QueuePush(&s, 4);
+	printf("back = %d\n", QueueBack(&s));
+	printf("front = %d\n", QueueFront(&s));
+	printf("size = %d\n", QueueSize(&s));
+
+
+	QueuePop(&s);
+	printf("back = %d\n", QueueBack(&s));
+	printf("front = %d\n", QueueFront(&s));
+	printf("size = %d\n", QueueSize(&s));
+
+
+	QueueDestroy(&s);
+}
