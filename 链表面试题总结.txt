@@ -1,0 +1,327 @@
+链表面试题总结
+1、删除链表中等于给定值val的所有节点
+typedef struct ListNode Node;
+struct ListNode* removeElements(struct ListNode* head, int val){
+    if(head == NULL){
+        return NULL;
+    }
+    Node* pCur = head;
+    Node* pPre = NULL;
+    while(pCur){
+        if(pCur->val == val){
+            //分两种情况：第一种是给定值在头节点的位置，第二种是在中间位置
+            //第一种情况
+            if(pPre == NULL){
+                //说明这个值在头节点
+                head = pCur->next;
+                free(pCur);
+                pCur = head;
+            }else{
+                //说明这个值在中间位置
+                pPre->next = pCur->next;
+                free(pCur);
+                pCur = pPre->next;
+            }
+        }else{
+            pPre = pCur;
+            pCur = pCur->next;
+        }
+    }
+    return head;
+}
+2、反转一个单链表
+第一种方法：
+typedef struct ListNode Node;
+struct ListNode* reverseList(struct ListNode* head){
+    if(head == NULL){
+        return NULL;
+    }
+    Node* pCur = head;
+    Node* pPre = NULL;
+    while(pCur){
+        Node* next = pCur->next;
+        pCur->next = pPre;
+        pPre = pCur;
+        pCur = next;
+    }
+    return pPre;
+}
+第二种方法：采用头删头插的方法
+typedef struct ListNode Node;
+struct ListNode* reverseList(struct ListNode* head){
+    if(head == NULL){
+        return NULL;
+    }
+    Node* pCur = head;
+    Node* result = NULL;
+    while(pCur){
+        Node* next = pCur->next;
+        pCur->next = result;
+        result = pCur;
+        pCur = next;
+    }
+    return result;
+}
+3、给定一个带有头结点head的非空单链表，返回链表的中间结点。如果有两个中间结点，则返回第二个中间结点
+typedef struct ListNode Node;
+struct ListNode* middleNode(struct ListNode* head){
+	if(head == NULL){
+        return NULL;
+    }
+    //解题思路：这道题有两种情况，一种是有奇数个结点，另一种是有偶数个结点
+    Node* fast = head;
+    Node* slow = head;
+    while(fast && fast->next){
+        fast = fast->next->next;
+        slow = slow->next;
+    }
+return slow;
+}
+4、输入一个链表，输出该链表中倒数第K个结点
+class Solution {
+public:
+    ListNode* FindKthToTail(ListNode* pListHead, unsigned int k) {
+        if(pListHead == NULL || k == 0){
+            return NULL;
+        }
+        ListNode* fast = pListHead;
+        ListNode* slow = pListHead;
+        
+        while(k--){
+            if(fast == NULL){
+                return NULL;
+            }
+            fast = fast->next;//让快指针先走K步
+        }
+        while(fast){
+            fast = fast->next;
+            slow = slow->next;
+        }
+        return slow;
+    }
+};
+5、将两个有序链表合并为一个新的有序链表并返回。新链表是通过拼接给定的两个链表的所有节点组成的。
+
+typedef struct ListNode Node;
+struct ListNode* mergeTwoLists(struct ListNode* l1, struct ListNode* l2){
+    if(l1 == NULL){
+        return l2;
+    }
+    if(l2 == NULL){
+        return l1;
+    }
+    Node head;
+    Node* result = &head;
+    while(l1&&l2){
+        if(l1->val >= l2->val){
+            result->next = l2;
+            l2 = l2->next;
+        }else{
+            result->next = l1;
+            l1 = l1->next;
+        }
+        result = result->next;
+    }
+   if(l2 == NULL){
+       result->next = l1;
+   }
+    if(l1 == NULL){
+        result->next = l2;
+    }
+    return head.next;
+}
+6、编写代码，以给定值x为基准将链表分割成两部分，所有小于x的结点排在大于等于x的结点之前
+class Partition {
+public:
+    ListNode* partition(ListNode* pHead, int x) {
+         if(pHead == NULL){
+             return NULL;
+         }
+        ListNode small(0);
+        ListNode large(0);
+        ListNode* pTail1 = &small;
+        ListNode* pTail2 = &large;
+        ListNode* pCur = pHead;
+        while(pCur){
+            if(pCur->val<x){
+                pTail1->next = pCur;
+                pTail1 = pTail1->next;
+            }else{
+                pTail2->next = pCur;
+                pTail2 = pTail2->next;
+            }
+            pCur = pCur->next;
+        }
+        pTail1->next = NULL;
+        pTail2->next = NULL;
+        pTail1->next = large.next;
+        return small.next;
+    }
+};
+8、链表的回文结构
+class PalindromeList {
+public:
+    bool chkPalindrome(ListNode* A) {
+        if(A == NULL){
+            return true;
+        }
+        int* p = (int*)malloc(sizeof(int)*900);
+        //将链表中所有节点的值放到辅助空间
+        ListNode* pCur = A;
+        int size = 0;
+        while(pCur){
+            p[size++] = pCur->val;
+            pCur = pCur->next;
+        }
+        int begin = 0;//int* begin = p;
+        int end = size-1;//int* end = p+size-1;
+		
+        while(begin<end){
+            if(p[begin] != p[end]){
+                free(p);
+                return false;
+            }
+            begin++;
+            end--;
+        }
+        return true;
+        free(p);
+    }
+};
+9、输入两个链表，找出他们的第一个公共结点
+typedef struct ListNode ListNode;
+struct ListNode *getIntersectionNode(struct ListNode *headA, struct ListNode *headB) {
+    if(headA == NULL || headB == NULL){
+        return NULL;
+    }
+    ListNode* pTail1 = headA;
+    ListNode* pTail2 = headB;
+    int sizeA = 1;
+    int sizeB = 1;
+    //先判断两个链表是否相交
+    //找这两个链表的最后一个结点，如果这两个链表的最后一个结点相同，说明这两个链表相交
+    while(pTail1->next){
+        sizeA++;
+        pTail1 = pTail1->next;
+    }
+    while(pTail2->next){
+        sizeB++;
+        pTail2 = pTail2->next;
+    }//此时两个链表都已经是最后一个结点了，接下来开始比较，看他们是否相等
+    if(pTail1!=pTail2){
+        return NULL;//两个链表不相交
+    }else{
+        //说明两个链表相交，接下来找他们的公共节点
+        int tmp = sizeA - sizeB;
+        ListNode* pCurA = headA;
+        ListNode* pCurB = headB;
+        if(tmp>0){
+            while(tmp--){
+                pCurA = pCurA->next;//说明pCurA比pCurB长，先让pCurA走两个链表的差值步
+            }
+        }else{
+            while(tmp++){
+                pCurB = pCurB->next;//说明pCurB比pCurA长，先让pCurB走两个链表的差值步
+            }
+        }
+        while(pCurA!=pCurB){
+            pCurA = pCurA->next;
+            pCurB = pCurB->next;
+        }
+        return pCurA;
+    }
+    
+}
+10、给定一个链表，判断链表中是否有环
+typedef struct ListNode Node;
+bool hasCycle(struct ListNode *head) {
+    if(head == NULL){
+        return false;
+    }
+    Node* fast = head;
+    Node* slow = head;
+    while(fast&&fast->next){
+        fast = fast->next->next;
+        slow = slow->next;
+        if(fast == slow){
+            return true;
+        }
+    }
+    return false;
+}
+11、给定一个链表，返回链表开始入环的第一个结点。如果链表无环，则返回NULL
+typedef struct ListNode ListNode;
+struct ListNode *detectCycle(struct ListNode *head) {
+    ListNode* fast = head;
+    ListNode* slow = head;
+    //首先判断链表是否有环
+    while(fast&&fast->next){
+        fast = fast->next->next;
+        slow = slow->next;
+        if(fast == slow){
+            break;//链表有环
+        }
+    }
+    //接下来看这个循环是因为什么结束的，如果是因为break跳出的，则就能说明这个链表有环；
+    //如果是因为循环条件不满足而结束循环，则就说明链表无环，此时直接返回NULL就行了
+    if(fast == NULL||fast->next == NULL){
+        return NULL;
+    }
+    //如果能执行到这一步，就说明链表是有环的,接下来找入环的第一个节点
+    ListNode* pH = head;
+    ListNode* pM = fast;
+    while(pH!=pM){
+        pH = pH->next;
+        pM = pM->next;
+    }
+    return pM;
+}
+12、给定一个链表，每个结点包含一个额外增加的随机指针，该指针可以指向链表中的任何结点或空结点。要求返回这个链表的深度拷贝
+Node* BuyNode(int data){
+    Node* pNewNode = (Node*)malloc(sizeof(Node));
+    if(pNewNode == NULL){
+        assert(0);
+        return NULL;
+    }
+    pNewNode->val = data;
+    pNewNode->next = NULL;
+    pNewNode->random = NULL;
+    return pNewNode;
+}
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+       if(head == NULL){
+           return NULL;
+       } 
+        //在原链表中每个节点后插入值相同的新节点
+        Node* pCur = head;
+        while(pCur){
+            Node* pNewNode = BuyNode(pCur->val);
+            pNewNode->next = pCur->next;
+            pCur->next = pNewNode;
+            pCur = pNewNode->next;
+        }
+        //给新插入结点的随机指针域赋值
+        pCur = head;
+        while(pCur){
+          Node* pNewNode = pCur->next;
+            if(pCur->random){
+                pNewNode->random = pCur->random->next; 
+            }
+           pCur = pNewNode->next;
+        }
+        //将新插入结点从原链表中拆下来
+        pCur = head;
+        Node* pNewHead = pCur->next;
+        while(pCur->next){
+           Node* pNewNode = pCur->next;
+            pCur->next = pNewNode->next;
+            pCur = pNewNode;
+        }
+        return pNewHead;
+    }
+};
+
+
+
