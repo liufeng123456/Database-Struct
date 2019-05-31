@@ -1,0 +1,137 @@
+BinaryTree.h实现
+
+
+#pragma once
+typedef char DataType;
+typedef struct BNode{
+struct BNode* left;
+struct BNode* right;
+DataType data;
+}BNode;
+BNode* BuyBinTreeNode(DataType data);
+BNode* CreateBinTree(DataType* array, int size,DataType invalid);
+BNode* _CreateBinTree(DataType* array, int size, int* index, int invalid);
+void LevelOrder(BNode* root);
+BNode* Find(BNode* root, DataType data);
+int GetKLevelNodeCount(BNode* root, int K);
+int GetLeafCount(BNode* root);
+void PreOrder(BNode* root);
+void DestroyBinTree(BNode** root);
+void TestBinTree();
+
+
+BinaryTree.c实现
+#include"BinaryTree.h"
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<assert.h>
+BNode* BuyBinTreeNode(DataType data) {
+ BNode* pNewNode = (BNode*)malloc(sizeof(BNode));
+ if (pNewNode == NULL) {
+  assert(0);
+  return NULL;
+ }
+ pNewNode->left = NULL;
+ pNewNode->right = NULL;
+ pNewNode->data = data;
+ return pNewNode;
+}
+BNode* CreateBinTree(DataType* array, int size,DataType invalid) {
+ int index = 0;
+ return _CreateBinTree(array, size, &index,invalid);
+}
+BNode* _CreateBinTree(DataType* array, int size,int* index,int invalid) {
+ //用树的概念
+ //根节点
+ BNode* pRoot = NULL;
+ if (*index < size&&'$'!=array[*index]) {
+  pRoot = BuyBinTreeNode(array[*index]);
+  ++(*index);
+  //根的左子树
+  pRoot->left = _CreateBinTree(array, size, index, invalid);
+  //根的右子树
+  ++(*index);
+  pRoot->right = _CreateBinTree(array, size, index, invalid);
+ }
+ return pRoot;
+}
+int GetKLevelNodeCount(BNode* root, int K) {
+ if (root == NULL || K <= 0) {
+  return 0;
+ }
+ if (K == 1) {
+  return 1;
+ }
+ return GetKLevelNodeCount(root->left, K - 1) + GetKLevelNodeCount(root->right, K - 1);
+}
+int GetLeafCount(BNode* root) {
+ if (root == NULL) {
+  return 0;
+ } else if (root->left == NULL && root->right == NULL) {
+  return 1;
+ }
+ return GetLeafCount(root->left) + GetLeafCount(root->right);
+}
+void PreOrder(BNode* root) {
+ if (root) {
+  printf("%c ", root->data);
+  PreOrder(root->left);
+  PreOrder(root->right);
+ }
+}
+void InOrder(BNode* root) {
+ if (root) {
+  InOrder(root->left);
+  printf("%c ", root->data);
+  InOrder(root->right);
+ }
+}
+void PostOrder(BNode* root) {
+ if (root) {
+  PostOrder(root->left);
+  PostOrder(root->right);
+  printf("%c ", root->data);
+ }
+}
+BNode* Find(BNode* root, DataType data) {
+ if (root == NULL) {
+  return NULL;
+ } else if (root->data == data) {
+  return root;
+ }
+ BNode* pNode = NULL;
+ if (pNode = Find(root->left, data)) {
+  return pNode;
+ }
+ return Find(root->right, data);
+}
+void DestroyBinTree(BNode** root) {
+ assert(root);
+ if (*root) {
+  DestroyBinTree(&(*root)->left);
+  DestroyBinTree(&(*root)->right);
+  free(*root);
+  *root = NULL;
+ }
+}
+void TestBinTree() {
+ char* str = "ABD$$$CE$$F";
+ BNode* pRoot = CreateBinTree(str,strlen(str),'$');
+ printf("前序遍历结果为:");
+ PreOrder(pRoot);
+ printf("\n");
+ printf("中序遍历结果为:");
+ InOrder(pRoot);
+ printf("\n");
+ printf("后序遍历结果为:");
+ PostOrder(pRoot);
+ printf("\n");
+ printf("K=3: %d\n", GetKLevelNodeCount(pRoot, 3));
+ if (Find(pRoot, 'E')) {
+  printf("找到了!!!\n");
+ } else {
+  printf("没找到!!!\n");
+ }
+ DestroyBinTree(&pRoot);
+}
